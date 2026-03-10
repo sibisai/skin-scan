@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.env
+
+# Model weights
+api/weights/*.pth
+api/weights/*.pt
+!api/weights/README.md
+
+# Node
+node_modules/
+.next/
+dist/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Vercel
+.vercel/

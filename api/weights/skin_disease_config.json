@@ -1,0 +1,11 @@
+{
+  "model_name": "skin_disease",
+  "architecture": "efficientnet_v2_s",
+  "num_classes": 6,
+  "class_names": ["acne", "eczema", "fungal", "healthy", "psoriasis", "scabies"],
+  "input_size": 224,
+  "normalize": {
+    "mean": [0.485, 0.456, 0.406],
+    "std": [0.229, 0.224, 0.225]
+  }
+}

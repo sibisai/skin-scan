@@ -1,0 +1,23 @@
+# Medical Image Analysis API - Requirements
+# Python 3.10+
+
+# Web Framework
+fastapi==0.109.2
+uvicorn[standard]==0.27.1
+python-multipart==0.0.9
+
+# ML/Deep Learning
+torch==2.2.0
+torchvision==0.17.0
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+# Image Processing
+Pillow==10.2.0
+opencv-python-headless==4.9.0.80
+numpy==1.26.4
+
+# Utilities
+python-dotenv==1.0.1
+
+# LLM Integration
+anthropic>=0.18.0
