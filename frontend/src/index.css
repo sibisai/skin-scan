@@ -6,14 +6,6 @@ body {
   @apply antialiased text-gray-900 bg-gray-25;
 }
 
-/* Line clamp utility */
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -32,14 +24,73 @@ body {
   @apply bg-gray-400;
 }
 
-/* Smooth transitions */
-* {
-  @apply transition-colors duration-150;
-}
-
 /* Focus styles */
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
   @apply outline-none ring-2 ring-primary-500 ring-offset-2;
+}
+
+/* Reusable component classes */
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-primary-600 text-white font-semibold
+           rounded-xl px-6 py-3 shadow-sm hover:bg-primary-700 hover:shadow-glow
+           active:scale-[0.98] transition-all duration-200 cursor-pointer;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 bg-white text-gray-700 font-medium
+           rounded-xl px-6 py-3 border border-gray-300 shadow-xs hover:bg-gray-50
+           active:scale-[0.98] transition-all duration-200 cursor-pointer;
+  }
+}
+
+/* Range slider */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1570EF;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1570EF;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* Loading animations */
+@keyframes scan {
+  0% { top: 0; opacity: 0; }
+  50% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+.animate-scan {
+  animation: scan 1.5s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.animate-shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
 }

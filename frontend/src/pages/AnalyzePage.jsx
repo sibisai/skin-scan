@@ -8,6 +8,15 @@ import { useImageAnalysis } from '../hooks/useImageAnalysis';
 import { API_URL } from '../utils/api';
 import { ArrowRight } from 'lucide-react';
 
+const StepHeader = ({ number, title }) => (
+  <div className="flex items-center gap-3 mb-4">
+    <span className="flex items-center justify-center w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-700 text-white rounded-xl shadow-sm text-sm font-bold">
+      {number}
+    </span>
+    <h3 className="text-lg font-bold text-gray-900">{title}</h3>
+  </div>
+);
+
 export default function AnalyzePage() {
   const selectedModel = 'skin_disease';
 
@@ -78,13 +87,23 @@ export default function AnalyzePage() {
     }
   }, [previewUrl, uploadedFile, selectedSample, selectedModel, analyze]);
 
+  // Scroll results into view when analysis completes
+  useEffect(() => {
+    if (result) {
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 150);
+    }
+  }, [result]);
+
   const hasSelection = selectedSample || uploadedFile;
 
   return (
     <div className="flex-1">
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-primary-50 to-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="bg-gradient-to-br from-primary-50 via-white to-primary-25 py-10 sm:py-14 relative overflow-hidden">
+        <div className="absolute -top-24 -right-24 w-72 h-72 bg-primary-100 rounded-full blur-3xl opacity-40 pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
             Skin Analysis
           </h2>
@@ -100,14 +119,9 @@ export default function AnalyzePage() {
 
           {/* Step 1: Image Selection */}
           <section className="mb-10">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="flex items-center justify-center w-7 h-7 bg-primary-100 text-primary-700 text-sm font-semibold rounded-full">
-                1
-              </span>
-              <h3 className="text-lg font-semibold text-gray-900">Select Image</h3>
-            </div>
+            <StepHeader number={1} title="Select Image" />
 
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
               <FileUploader
                 onFileSelect={handleFileSelect}
                 selectedFile={uploadedFile}
@@ -137,16 +151,11 @@ export default function AnalyzePage() {
             {/* Analyze Button */}
             {hasSelection && !result && !isAnalyzing && (
               <div className="mb-10">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="flex items-center justify-center w-7 h-7 bg-primary-100 text-primary-700 text-sm font-semibold rounded-full">
-                    2
-                  </span>
-                  <h3 className="text-lg font-semibold text-gray-900">Analyze</h3>
-                </div>
+                <StepHeader number={2} title="Analyze" />
                 <button
                   onClick={handleAnalyze}
                   disabled={isAnalyzing}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-primary-600 hover:bg-primary-700 hover:shadow-glow text-white font-semibold rounded-xl shadow-sm active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Analyze Skin
                   <ArrowRight className="w-5 h-5" />
@@ -157,12 +166,7 @@ export default function AnalyzePage() {
             {/* Results */}
             {(isAnalyzing || result || error) && (
               <div ref={resultsRef} className="scroll-mt-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="flex items-center justify-center w-7 h-7 bg-primary-100 text-primary-700 text-sm font-semibold rounded-full">
-                    3
-                  </span>
-                  <h3 className="text-lg font-semibold text-gray-900">Results</h3>
-                </div>
+                <StepHeader number={3} title="Results" />
 
                 {isAnalyzing && <LoadingState imageUrl={previewUrl} />}
 

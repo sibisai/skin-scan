@@ -118,11 +118,11 @@ export default function AnalysisResults({
         </p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
         {/* Prediction Header */}
         <div className={clsx(
           'px-6 py-4 border-b',
-          isPredictionCorrect ? 'bg-success-50 border-success-100' : 'bg-warning-50 border-warning-100'
+          isPredictionCorrect ? 'bg-gradient-to-r from-success-50 to-white border-success-100' : 'bg-gradient-to-r from-warning-50 to-white border-warning-100'
         )}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -142,14 +142,25 @@ export default function AnalysisResults({
               </div>
             </div>
 
-            <div className="text-right">
-              <p className="text-sm text-gray-600">Confidence</p>
-              <p className={clsx(
-                'text-xl font-bold',
-                isPredictionCorrect ? 'text-success-700' : 'text-warning-700'
-              )}>
-                {formatConfidence(confidence)}%
-              </p>
+            <div className="flex flex-col items-center">
+              <p className="text-sm text-gray-600 mb-1">Confidence</p>
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center"
+                style={{
+                  '--conf-pct': formatConfidence(confidence),
+                  '--conf-color': isPredictionCorrect ? '#12b76a' : '#f79009',
+                  background: 'conic-gradient(var(--conf-color) calc(var(--conf-pct) * 1%), #e5e7eb calc(var(--conf-pct) * 1%))',
+                }}
+              >
+                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
+                  <span className={clsx(
+                    'text-sm font-bold',
+                    isPredictionCorrect ? 'text-success-700' : 'text-warning-700'
+                  )}>
+                    {formatConfidence(confidence)}%
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -160,13 +171,9 @@ export default function AnalysisResults({
                 <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
                 Generating explanation...
               </div>
-            ) : explanation ? (
+            ) : (explanation || conditionDescription) ? (
               <p className="text-sm text-gray-600 leading-relaxed">
-                {explanation}
-              </p>
-            ) : conditionDescription ? (
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {conditionDescription}
+                {explanation || conditionDescription}
               </p>
             ) : null}
           </div>
@@ -194,36 +201,38 @@ export default function AnalysisResults({
               )}
 
               {/* Side-by-side comparison */}
-              <div className="grid grid-cols-2 gap-3 mb-3">
-                {/* Original Image */}
-                <div>
-                  <p className="text-xs font-medium text-gray-500 mb-2 text-center">Original</p>
-                  <div className="aspect-square bg-gray-900 rounded-lg overflow-hidden">
-                    {originalImage && (
-                      <img
-                        src={originalImage}
-                        alt="Original"
-                        className="w-full h-full object-cover"
-                      />
-                    )}
+              <div className="bg-gray-50 rounded-xl p-3">
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Original Image */}
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 mb-2 text-center">Original</p>
+                    <div className="aspect-square bg-gray-900 rounded-lg overflow-hidden">
+                      {originalImage && (
+                        <img
+                          src={originalImage}
+                          alt="Original"
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                {/* Blended Heatmap */}
-                <div>
-                  <p className="text-xs font-medium text-gray-500 mb-2 text-center">Heatmap Overlay</p>
-                  <div className="aspect-square bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center">
-                    <canvas
-                      ref={canvasRef}
-                      className="w-full h-full object-cover"
-                      style={{ imageRendering: 'auto' }}
-                    />
+                  {/* Blended Heatmap */}
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 mb-2 text-center">Heatmap Overlay</p>
+                    <div className="aspect-square bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center">
+                      <canvas
+                        ref={canvasRef}
+                        className="w-full h-full object-cover"
+                        style={{ imageRendering: 'auto' }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Color Legend - directly under images */}
-              <div className="flex items-center justify-center gap-2 text-xs text-gray-500 font-medium mb-4">
+              <div className="flex items-center justify-center gap-2 text-xs text-gray-500 font-medium mt-3 mb-4">
                 <span>Low importance</span>
                 <div className="w-24 h-1 rounded-full bg-gradient-to-r from-blue-500 via-yellow-400 to-red-500" />
                 <span>High importance</span>
@@ -249,38 +258,6 @@ export default function AnalysisResults({
                 />
               </div>
 
-              <style>{`
-                .slider {
-                  -webkit-appearance: none;
-                  appearance: none;
-                  width: 100%;
-                  height: 6px;
-                  background: #e5e7eb;
-                  border-radius: 3px;
-                  outline: none;
-                  cursor: pointer;
-                }
-                .slider::-webkit-slider-thumb {
-                  -webkit-appearance: none;
-                  appearance: none;
-                  width: 18px;
-                  height: 18px;
-                  border-radius: 50%;
-                  background: #1570EF;
-                  cursor: pointer;
-                  border: 2px solid white;
-                  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-                }
-                .slider::-moz-range-thumb {
-                  width: 18px;
-                  height: 18px;
-                  border-radius: 50%;
-                  background: #1570EF;
-                  cursor: pointer;
-                  border: 2px solid white;
-                  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-                }
-              `}</style>
             </div>
 
             {/* Probabilities Section */}
@@ -315,11 +292,11 @@ export default function AnalysisResults({
                         </span>
                       </div>
 
-                      <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
                         <div
                           className={clsx(
                             'h-full rounded-full transition-all duration-500 ease-out',
-                            isPredicted ? 'bg-primary-500' : 'bg-gray-300'
+                            isPredicted ? 'bg-gradient-to-r from-primary-400 to-primary-600' : 'bg-gray-300'
                           )}
                           style={{ width: `${percentage}%` }}
                         />
@@ -334,7 +311,7 @@ export default function AnalysisResults({
                 <button
                   onClick={handleDownload}
                   disabled={isGeneratingPDF}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-600 border border-primary-200 rounded-lg hover:bg-primary-50 disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 shadow-sm hover:shadow-md disabled:opacity-50 transition-all duration-200"
                 >
                   <Download className="w-4 h-4" />
                   {isGeneratingPDF ? 'Generating...' : 'Download Report'}

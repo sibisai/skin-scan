@@ -2,12 +2,10 @@ import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 export default function ErrorMessage({ message, onRetry }) {
   return (
-    <div className="bg-error-50 border border-error-200 rounded-xl p-6">
+    <div className="bg-error-50 border border-error-200 rounded-2xl shadow-sm border-l-4 border-l-error-500 p-6">
       <div className="flex items-start gap-4">
-        <div className="flex-shrink-0">
-          <div className="w-10 h-10 bg-error-100 rounded-full flex items-center justify-center">
-            <AlertTriangle className="w-5 h-5 text-error-500" />
-          </div>
+        <div className="w-10 h-10 bg-error-100 rounded-full flex items-center justify-center flex-shrink-0">
+          <AlertTriangle className="w-5 h-5 text-error-500" />
         </div>
         
         <div className="flex-1">
@@ -21,7 +19,7 @@ export default function ErrorMessage({ message, onRetry }) {
           {onRetry && (
             <button
               onClick={onRetry}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-error-700 bg-error-100 hover:bg-error-200 rounded-lg transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-error-700 bg-error-100 hover:bg-error-200 rounded-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
             >
               <RefreshCw className="w-4 h-4" />
               Try Again
