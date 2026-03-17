@@ -1,11 +1,33 @@
 {
   "model_name": "skin_disease",
-  "architecture": "efficientnet_v2_s",
+  "architecture": "dinov2_vitb14_skin",
+  "backbone": "Jayanth2002/dinov2-base-finetuned-SkinDisease",
   "num_classes": 6,
-  "class_names": ["acne", "eczema", "fungal", "healthy", "psoriasis", "scabies"],
+  "class_names": [
+    "acne",
+    "eczema",
+    "fungal",
+    "healthy",
+    "psoriasis",
+    "scabies"
+  ],
   "input_size": 224,
+  "hidden_dim": 768,
   "normalize": {
-    "mean": [0.485, 0.456, 0.406],
-    "std": [0.229, 0.224, 0.225]
-  }
+    "mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "std": [
+      0.229,
+      0.224,
+      0.225
+    ]
+  },
+  "test_accuracy": 0.8902654867256637,
+  "best_val_accuracy": 0.8619469026548673,
+  "training_phase": "phase2b_demo_optimized",
+  "loss": "FocalLoss(gamma=2.0, alpha=per_class)",
+  "oversampling_power": 0.75
 }

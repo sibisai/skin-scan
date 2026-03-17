@@ -1,4 +1,4 @@
-# Medical Image Analysis API - Requirements
+# SkinScan API - Requirements
 # Python 3.10+
 
 # Web Framework
@@ -7,9 +7,10 @@ uvicorn[standard]==0.27.1
 python-multipart==0.0.9
 
 # ML/Deep Learning
-torch==2.2.0
-torchvision==0.17.0
+torch>=2.6.0
+torchvision>=0.21.0
 --extra-index-url https://download.pytorch.org/whl/cpu
+transformers>=4.36.0
 
 # Image Processing
 Pillow==10.2.0

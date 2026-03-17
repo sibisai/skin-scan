@@ -1,188 +1,85 @@
-# MedLens
+# SkinScan
 
-A medical image analysis and education platform with deep learning models, Grad-CAM visualization, and AI-powered explanations. Built with PyTorch, FastAPI, and React.
-
-## Demo
-
-🔗 **Live Demo**: [medical-image-classifier-two.vercel.app](https://medical-image-classifier-two.vercel.app)
+A skin disease classification platform with deep learning, model attention visualization, and AI-powered explanations. Built with DINOv2, FastAPI, and React.
 
 ## Overview
 
 This project provides:
-- REST API for medical image classification with Grad-CAM visualization
+
+- REST API for skin disease classification with model attention visualization
 - AI-generated explanations using Claude vision API
-- **Analyze Mode**: Upload images for diagnosis with visual + written explanations
-- **Learn Mode**: Unlimited quiz for practicing diagnosis with instant feedback
-- **Dashboard**: Track learning progress with accuracy charts and weak area identification
-- Extensible architecture for adding new classification models
+- **Analyze Mode**: Upload or photograph skin areas for AI-powered analysis with visual + written explanations
+- Single-model architecture optimized for skin disease detection
 
-## Models
+## Model
 
-| Model | Task | Classes | Accuracy | AUC |
-|-------|------|---------|----------|-----|
-| `brain_tumor` | MRI Classification | Glioma, Meningioma, Pituitary, No Tumor | 99% | - |
-| `pneumonia` | Chest X-Ray | Normal, Pneumonia | 88% | 0.958 |
-| `bone_fracture` | X-Ray Fracture Detection | Fractured, Not Fractured | 98% | 0.998 |
-| `retinal_oct` | Retinal OCT Analysis | CNV, DME, Drusen, Normal | 99% | - |
+| Model          | Task                        | Classes                                                     | Accuracy |
+| -------------- | --------------------------- | ----------------------------------------------------------- | -------- |
+| `skin_disease` | Skin Disease Classification | Acne, Eczema, Fungal Infection, Healthy, Psoriasis, Scabies | 89%      |
 
 ## Results
 
-> 📊 **Click on any model below** to view training curves, confusion matrix, and Grad-CAM visualizations.
+> Click below to view training curves, confusion matrix, and model attention visualizations.
 
 <details>
-<summary><strong>🧠 Brain Tumor MRI Classification</strong> (99% accuracy)</summary>
+<summary><strong>Skin Disease Classification</strong> (89% accuracy)</summary>
 
-### Brain Tumor MRI Classification
+### Skin Disease Classification
 
-4-class classification of brain MRI scans.
+6-class classification of skin images using DINOv2 ViT-B/14.
 
-| Metric | Value |
-|--------|-------|
-| Test Accuracy | 99% |
-| Classes | Glioma, Meningioma, Pituitary, No Tumor |
+| Metric        | Value                                                       |
+| ------------- | ----------------------------------------------------------- |
+| Test Accuracy | 89%                                                         |
+| Classes       | Acne, Eczema, Fungal Infection, Healthy, Psoriasis, Scabies |
+| Architecture  | DINOv2 ViT-B/14 (partially fine-tuned)                      |
 
 **Training Progress**
 
-![Brain Tumor Training](assets/brain_tumor_training.png)
+![Skin Disease Training](assets/skin_disease_training.png)
 
 **Confusion Matrix**
 
-![Brain Tumor Confusion Matrix](assets/brain_tumor_confusion_matrix.png)
+![Skin Disease Confusion Matrix](assets/skin_disease_confusion_matrix.png)
 
-**Grad-CAM Visualizations**
+**Model Attention Visualizations**
 
-![Brain Tumor Grad-CAM](assets/brain_tumor_gradcam.png)
-
-</details>
-
-<details>
-<summary><strong>🫁 Pneumonia Detection</strong> (88% accuracy, 0.958 AUC)</summary>
-
-### Pneumonia Detection
-
-Binary classification from chest X-rays.
-
-| Metric | Value |
-|--------|-------|
-| Test Accuracy | 88% |
-| AUC Score | 0.958 |
-| Classes | Normal, Pneumonia |
-
-**Training Progress**
-
-![Pneumonia Training](assets/pneumonia_training.png)
-
-**Confusion Matrix**
-
-![Pneumonia Confusion Matrix](assets/pneumonia_confusion_matrix.png)
-
-**ROC Curve**
-
-![Pneumonia ROC Curve](assets/pneumonia_roc_curve.png)
-
-**Grad-CAM Visualizations**
-
-![Pneumonia Grad-CAM](assets/pneumonia_gradcam.png)
-
-</details>
-
-<details>
-<summary><strong>🦴 Bone Fracture Detection</strong> (98% accuracy, 0.998 AUC)</summary>
-
-### Bone Fracture Detection
-
-Binary classification of X-rays across all anatomical regions.
-
-| Metric | Value |
-|--------|-------|
-| Test Accuracy | 98.22% |
-| AUC Score | 0.998 |
-| Classes | Fractured, Not Fractured |
-
-**Training Progress**
-
-![Bone Fracture Training](assets/bone_fracture_training.png)
-
-**Confusion Matrix**
-
-![Bone Fracture Confusion Matrix](assets/bone_fracture_confusion_matrix.png)
-
-**ROC Curve**
-
-![Bone Fracture ROC Curve](assets/bone_fracture_roc_curve.png)
-
-**Grad-CAM Visualizations**
-
-![Bone Fracture Grad-CAM](assets/bone_fracture_gradcam.png)
-
-</details>
-
-<details>
-<summary><strong>👁️ Retinal OCT Analysis</strong> (99% accuracy)</summary>
-
-### Retinal OCT Analysis
-
-4-class classification of retinal OCT scans for eye disease detection.
-
-| Metric | Value |
-|--------|-------|
-| Test Accuracy | 99.38% |
-| Classes | CNV, DME, Drusen, Normal |
-
-**Training Progress**
-
-![Retinal OCT Training](assets/retinal_oct_training.png)
-
-**Confusion Matrix**
-
-![Retinal OCT Confusion Matrix](assets/retinal_oct_confusion_matrix.png)
-
-**Grad-CAM Visualizations**
-
-![Retinal OCT Grad-CAM](assets/retinal_oct_gradcam.png)
+![Skin Disease Model Attention](assets/skin_disease_gradcam.png)
 
 </details>
 
 ## Project Structure
 
 ```
-medical-image-classifier/
+skin-disease-app/
 ├── api/
 │   ├── app/
 │   │   ├── main.py             # FastAPI application
 │   │   ├── models/
 │   │   │   ├── base.py         # Base classifier interface
-│   │   │   ├── brain_tumor.py  # Brain tumor classifier
-│   │   │   ├── pneumonia.py    # Pneumonia classifier
-│   │   │   ├── bone_fracture.py # Bone fracture classifier
-│   │   │   └── retinal_oct.py  # Retinal OCT classifier
+│   │   │   └── skin_disease.py # Skin disease classifier (DINOv2)
 │   │   └── utils/
-│   │       ├── gradcam.py      # Grad-CAM visualization
+│   │       ├── gradcam.py      # Model attention visualization
 │   │       └── llm.py          # Claude LLM integration
 │   ├── scripts/
 │   │   ├── generate_explanations.py  # Batch generate explanations
-│   │   └── generate_overlays.py      # Batch generate Grad-CAM overlays
+│   │   └── generate_overlays.py      # Batch generate overlays
 │   ├── weights/                # Model weights (not tracked in git)
 │   ├── Dockerfile
 │   ├── fly.toml
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
-│   │   ├── pages/              # HomePage, AnalyzePage, LearnPage, DashboardPage
+│   │   ├── pages/              # HomePage, AnalyzePage
 │   │   ├── components/         # React components
-│   │   │   ├── shared/         # Navigation
-│   │   │   └── quiz/           # Quiz components
 │   │   ├── hooks/              # Custom hooks
-│   │   └── utils/              # API, sample data, dashboard data
+│   │   └── utils/              # API, sample data
 │   ├── public/
 │   │   └── samples/            # Sample images and pre-cached overlays
 │   ├── package.json
 │   └── vite.config.js
-├── notebooks/
-│   ├── brain_tumor_classifier.ipynb
-│   ├── pneumonia_classifier.ipynb
-│   ├── bone_fracture_classifier.ipynb
-│   └── retinal_oct_classifier.ipynb
+├── notebook/
+│   └── skin_disease_classifier_v3.ipynb  # Training notebook (data pipeline + model training)
 └── assets/                     # README images
 ```
 
@@ -190,48 +87,42 @@ medical-image-classifier/
 
 ### Model Architecture
 
-All models use EfficientNet-V2-S pretrained on ImageNet with custom classification heads:
+DINOv2 ViT-B/14 pre-trained on skin diseases ([Jayanth2002/dinov2-base-finetuned-SkinDisease](https://huggingface.co/Jayanth2002/dinov2-base-finetuned-SkinDisease)) with a linear classifier head:
+
 - Input: 224x224 RGB images
-- Backbone: EfficientNet-V2-S (frozen early layers)
-- Classifier: Dropout(0.3) → Linear(1280, 512) → ReLU → Dropout(0.15) → Linear(512, num_classes)
+- Backbone: DINOv2 ViT-B/14 (partially fine-tuned — last 4 encoder layers)
+- Classifier: Dropout(0.3) → Linear(768, 6)
+- Training: Two-phase — frozen backbone pre-training, then partial unfreeze with EMA + MixUp
 
-### Grad-CAM
+### Model Attention Visualization
 
-Visualizations generated by backpropagating target class scores and computing weighted activation maps from the last convolutional layer.
+Extracts CLS-to-patch self-attention weights from DINOv2's last encoder layer, averages across attention heads, and reshapes to a spatial grid for heatmap visualization. This shows which image regions the model focuses on when making its prediction.
 
 ### LLM Explanations
 
-Image-specific explanations generated using Claude Haiku vision API, describing anatomical findings and Grad-CAM focus areas.
-
-### Frontend Features
-
-- **Analyze Mode**: Model selection, sample gallery, drag-and-drop upload, Grad-CAM visualization with opacity slider, AI explanations
-- **Learn Mode**: Unlimited quiz, instant feedback with Grad-CAM, pre-cached explanations, session tracking
-- **Dashboard**: Accuracy stats, per-model charts, weak area identification, session history
-- Mobile responsive design
+Image-specific explanations generated using Claude Haiku vision API, describing anatomical findings and model attention focus areas.
 
 ### Datasets
 
-| Model | Dataset |
-|-------|---------|
-| Brain Tumor | [Brain Tumor MRI Dataset](https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset) |
-| Pneumonia | [Chest X-Ray Pneumonia](https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia) |
-| Bone Fracture | [Fracture Multi-Region X-ray](https://www.kaggle.com/datasets/bmadushanirodrigo/fracture-multi-region-x-ray-data) |
-| Retinal OCT | [Retinal OCT Images](https://www.kaggle.com/datasets/paultimothymooney/kermany2018) |
+| Dataset      | Source                                                                                      | Description                             |
+| ------------ | ------------------------------------------------------------------------------------------- | --------------------------------------- |
+| SCIN         | [Google HuggingFace](https://huggingface.co/datasets/google/scin)                           | 5,033 user-submitted phone photos       |
+| SkinDisNet   | [Mendeley](https://data.mendeley.com/datasets/97s3xnrk6g)                                   | 1,710 smartphone photos from Bangladesh |
+| Skin Lesions | [HuggingFace](https://huggingface.co/datasets/ahmed-ai/skin-lesions-classification-dataset) | Healthy skin images                     |
+| DermNet      | [Kaggle](https://www.kaggle.com/datasets/shubhamgoel27/dermnet)                             | Clinical atlas photos                   |
+| SD-198       | [HuggingFace](https://huggingface.co/datasets/Ammar-Dar/sd-198)                             | Fine-grained clinical images            |
 
 ## API Reference
 
-Full API documentation available at [medical-image-api.fly.dev/docs](https://medical-image-api.fly.dev/docs)
-
 ### Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/health` | Health check |
-| `GET` | `/models` | List available models |
-| `POST` | `/predict/{model_name}` | Classification |
-| `POST` | `/predict/{model_name}/gradcam` | Classification with Grad-CAM |
-| `POST` | `/explain/{model_name}` | AI-generated explanation |
+| Method | Endpoint                        | Description                          |
+| ------ | ------------------------------- | ------------------------------------ |
+| `GET`  | `/health`                       | Health check                         |
+| `GET`  | `/models`                       | List available models                |
+| `POST` | `/predict/{model_name}`         | Classification                       |
+| `POST` | `/predict/{model_name}/gradcam` | Classification with attention map    |
+| `POST` | `/explain/{model_name}`         | AI-generated explanation             |
 
 ## Local Development
 
@@ -239,7 +130,7 @@ Full API documentation available at [medical-image-api.fly.dev/docs](https://med
 
 ```bash
 cd api
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
@@ -271,9 +162,6 @@ MIT
 
 ## Acknowledgments
 
-- [Brain Tumor MRI Dataset](https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset) by Masoud Nickparvar
-- [Chest X-Ray Pneumonia Dataset](https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia) by Paul Mooney
-- [Bone Fracture Dataset](https://www.kaggle.com/datasets/bmadushanirodrigo/fracture-multi-region-x-ray-data) by B. Madushani Rodrigo
-- [Retinal OCT Dataset](https://www.kaggle.com/datasets/paultimothymooney/kermany2018) by Kermany et al.
-- [EfficientNet-V2](https://arxiv.org/abs/2104.00298) by Google Research
-- [Grad-CAM](https://arxiv.org/abs/1610.02391) by Selvaraju et al.
+- [SCIN Dataset](https://huggingface.co/datasets/google/scin) by Google
+- [SkinDisNet Dataset](https://data.mendeley.com/datasets/97s3xnrk6g) by Mendeley
+- [DINOv2](https://arxiv.org/abs/2304.07193) by Meta AI

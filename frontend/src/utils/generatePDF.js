@@ -42,7 +42,7 @@ export async function generateAnalysisReport({
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(22);
   doc.setTextColor(30, 30, 30);
-  doc.text('Medical Image Analysis Report', margin, yPos);
+  doc.text('SkinScan Analysis Report', margin, yPos);
 
   // Date and model
   yPos += 9;
@@ -112,7 +112,7 @@ export async function generateAnalysisReport({
   doc.setFontSize(9);
   doc.setTextColor(100, 100, 100);
   doc.text('Original', imagesStartX + (imageSize / 2), yPos, { align: 'center' });
-  doc.text('Grad-CAM Visualization', imagesStartX + imageSize + imageGap + (imageSize / 2), yPos, { align: 'center' });
+  doc.text('Model Attention', imagesStartX + imageSize + imageGap + (imageSize / 2), yPos, { align: 'center' });
 
   yPos += 4;
   const imageY = yPos;
@@ -253,7 +253,7 @@ export async function generateAnalysisReport({
   // Footer
   doc.setFontSize(8);
   doc.setTextColor(170, 170, 170);
-  doc.text('Medical Image Analysis Platform', pageWidth / 2, pageHeight - 6, { align: 'center' });
+  doc.text('SkinScan', pageWidth / 2, pageHeight - 6, { align: 'center' });
 
   // Save
   const fileName = `analysis_report_${prediction.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}.pdf`;

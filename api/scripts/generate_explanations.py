@@ -10,60 +10,34 @@ Output:
   Prints JavaScript object to paste into sampleData.js
 """
 
-import os
 import sys
-import json
 import base64
 import requests
 from pathlib import Path
 
-# Configuration
 API_URL = "http://localhost:8000"
 SAMPLES_DIR = Path(__file__).parent.parent.parent / "frontend" / "public" / "samples"
 
-# Sample images structure (matches sampleData.js)
+# Matches sampleData.js
 SAMPLE_IMAGES = {
-    "brain_tumor": [
-        {"id": "glioma_1", "label": "Glioma", "path": "brain_tumor/glioma_1.jpg"},
-        {"id": "glioma_2", "label": "Glioma", "path": "brain_tumor/glioma_2.jpg"},
-        {"id": "meningioma_1", "label": "Meningioma", "path": "brain_tumor/meningioma_1.jpg"},
-        {"id": "meningioma_2", "label": "Meningioma", "path": "brain_tumor/meningioma_2.jpg"},
-        {"id": "pituitary_1", "label": "Pituitary", "path": "brain_tumor/pituitary_1.jpg"},
-        {"id": "pituitary_2", "label": "Pituitary", "path": "brain_tumor/pituitary_2.jpg"},
-        {"id": "notumor_1", "label": "No Tumor", "path": "brain_tumor/notumor_1.jpg"},
-        {"id": "notumor_2", "label": "No Tumor", "path": "brain_tumor/notumor_2.jpg"},
-    ],
-    "pneumonia": [
-        {"id": "normal_1", "label": "Normal", "path": "pneumonia/normal_1.jpg"},
-        {"id": "normal_2", "label": "Normal", "path": "pneumonia/normal_2.jpg"},
-        {"id": "pneumonia_1", "label": "Pneumonia", "path": "pneumonia/pneumonia_1.jpg"},
-        {"id": "pneumonia_2", "label": "Pneumonia", "path": "pneumonia/pneumonia_2.jpg"},
-    ],
-    "retinal_oct": [
-        {"id": "cnv_1", "label": "CNV", "path": "retinal_oct/cnv_1.jpg"},
-        {"id": "cnv_2", "label": "CNV", "path": "retinal_oct/cnv_2.jpg"},
-        {"id": "dme_1", "label": "DME", "path": "retinal_oct/dme_1.jpg"},
-        {"id": "dme_2", "label": "DME", "path": "retinal_oct/dme_2.jpg"},
-        {"id": "drusen_1", "label": "Drusen", "path": "retinal_oct/drusen_1.jpg"},
-        {"id": "drusen_2", "label": "Drusen", "path": "retinal_oct/drusen_2.jpg"},
-        {"id": "normal_1", "label": "Normal", "path": "retinal_oct/normal_1.jpg"},
-        {"id": "normal_2", "label": "Normal", "path": "retinal_oct/normal_2.jpg"},
-    ],
-    "bone_fracture": [
-        {"id": "fractured_1", "label": "Fractured", "path": "bone_fracture/fractured_1.jpg"},
-        {"id": "fractured_2", "label": "Fractured", "path": "bone_fracture/fractured_2.jpg"},
-        {"id": "fractured_3", "label": "Fractured", "path": "bone_fracture/fractured_3.jpg"},
-        {"id": "fractured_4", "label": "Fractured", "path": "bone_fracture/fractured_4.jpg"},
-        {"id": "normal_1", "label": "Not Fractured", "path": "bone_fracture/normal_1.jpg"},
-        {"id": "normal_2", "label": "Not Fractured", "path": "bone_fracture/normal_2.jpg"},
-        {"id": "normal_3", "label": "Not Fractured", "path": "bone_fracture/normal_3.jpg"},
-        {"id": "normal_4", "label": "Not Fractured", "path": "bone_fracture/normal_4.jpg"},
+    "skin_disease": [
+        {"id": "acne_1", "label": "Acne", "path": "skin_disease/acne_1.jpg"},
+        {"id": "acne_2", "label": "Acne", "path": "skin_disease/acne_2.jpg"},
+        {"id": "eczema_1", "label": "Eczema", "path": "skin_disease/eczema_1.jpg"},
+        {"id": "eczema_2", "label": "Eczema", "path": "skin_disease/eczema_2.jpg"},
+        {"id": "fungal_1", "label": "Fungal", "path": "skin_disease/fungal_1.jpg"},
+        {"id": "fungal_2", "label": "Fungal", "path": "skin_disease/fungal_2.jpg"},
+        {"id": "healthy_1", "label": "Healthy", "path": "skin_disease/healthy_1.jpg"},
+        {"id": "healthy_2", "label": "Healthy", "path": "skin_disease/healthy_2.jpg"},
+        {"id": "psoriasis_1", "label": "Psoriasis", "path": "skin_disease/psoriasis_1.jpg"},
+        {"id": "psoriasis_2", "label": "Psoriasis", "path": "skin_disease/psoriasis_2.jpg"},
+        {"id": "scabies_1", "label": "Scabies", "path": "skin_disease/scabies_1.jpg"},
+        {"id": "scabies_2", "label": "Scabies", "path": "skin_disease/scabies_2.jpg"},
     ],
 }
 
 
 def check_api():
-    """Check if API is running."""
     try:
         response = requests.get(f"{API_URL}/health")
         if response.status_code == 200:
@@ -81,14 +55,10 @@ def check_api():
 
 
 def get_explanation(model: str, image_path: Path) -> dict:
-    """
-    Get prediction and explanation for a single image.
-    Returns dict with prediction, confidence, and explanation.
-    """
+    """Get prediction and explanation for a single image."""
     if not image_path.exists():
         return {"error": f"File not found: {image_path}"}
     
-    # Step 1: Get Grad-CAM prediction
     with open(image_path, "rb") as f:
         files = {"file": (image_path.name, f, "image/jpeg")}
         response = requests.post(
@@ -107,7 +77,6 @@ def get_explanation(model: str, image_path: Path) -> dict:
     if not comparison_b64:
         return {"error": "No comparison image returned"}
     
-    # Step 2: Get explanation
     comparison_bytes = base64.b64decode(comparison_b64)
     
     files = {"file": ("comparison.png", comparison_bytes, "image/png")}
@@ -133,10 +102,9 @@ def get_explanation(model: str, image_path: Path) -> dict:
 
 def main():
     print("=" * 60)
-    print("MedLens - Batch Generate Explanations")
+    print("SkinScan - Batch Generate Explanations")
     print("=" * 60)
     
-    # Check API
     if not check_api():
         sys.exit(1)
     
@@ -147,13 +115,12 @@ def main():
         print("Update SAMPLES_DIR path in this script.")
         sys.exit(1)
     
-    # Generate explanations
     explanations = {}
     total = sum(len(samples) for samples in SAMPLE_IMAGES.values())
     current = 0
     
     print(f"\nGenerating explanations for {total} images...")
-    print("This will take ~{} minutes\n".format(total * 4 // 60 + 1))
+    print(f"This will take ~{total * 4 // 60 + 1} minutes\n")
     
     for model, samples in SAMPLE_IMAGES.items():
         print(f"\n[{model}]")
@@ -174,7 +141,6 @@ def main():
                 print(f"OK ({result['prediction']}, {result['confidence']*100:.1f}%)")
                 explanations[key] = result["explanation"]
     
-    # Output as JavaScript
     print("\n" + "=" * 60)
     print("COPY THE FOLLOWING INTO sampleData.js:")
     print("=" * 60 + "\n")
@@ -189,14 +155,7 @@ def main():
         print(f'  "{key}": "{escaped}",')
     
     print("};")
-    
-    # Also save as JSON for backup
-    output_file = Path(__file__).parent / "cached_explanations.json"
-    with open(output_file, "w") as f:
-        json.dump(explanations, f, indent=2)
-    
-    print(f"\n\nAlso saved to: {output_file}")
-    print("Done!")
+    print("\nDone!")
 
 
 if __name__ == "__main__":

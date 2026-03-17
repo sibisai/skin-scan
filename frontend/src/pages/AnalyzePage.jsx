@@ -1,15 +1,20 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import SampleImages from '../components/SampleImages';
 import FileUploader from '../components/FileUploader';
 import AnalysisResults from '../components/AnalysisResults';
 import LoadingState from '../components/LoadingState';
 import ErrorMessage from '../components/ErrorMessage';
 import { useImageAnalysis } from '../hooks/useImageAnalysis';
+import { API_URL } from '../utils/api';
 import { ArrowRight } from 'lucide-react';
 
 export default function AnalyzePage() {
-  // Hardcoded to skin_disease - no model selection needed
   const selectedModel = 'skin_disease';
+
+  // Warm up API server (Fly.io scales to 0 when idle)
+  useEffect(() => {
+    fetch(`${API_URL}/health`).catch(() => {});
+  }, []);
 
   const [selectedSample, setSelectedSample] = useState(null);
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -20,7 +25,6 @@ export default function AnalyzePage() {
 
   const { analyze, reset, isAnalyzing, isExplaining, result, explanation, error } = useImageAnalysis();
 
-  // Handle sample image selection
   const handleSampleSelect = useCallback((sample) => {
     setSelectedSample(sample);
     setUploadedFile(null);
@@ -31,7 +35,6 @@ export default function AnalyzePage() {
     }, 100);
   }, [reset]);
 
-  // Handle file upload
   const handleFileSelect = useCallback((file) => {
     setUploadedFile(file);
     setSelectedSample(null);
@@ -44,7 +47,6 @@ export default function AnalyzePage() {
     return () => URL.revokeObjectURL(url);
   }, [reset]);
 
-  // Clear selection
   const handleClear = useCallback(() => {
     setUploadedFile(null);
     setSelectedSample(null);
@@ -52,7 +54,6 @@ export default function AnalyzePage() {
     reset();
   }, [reset]);
 
-  // Run analysis
   const handleAnalyze = useCallback(async () => {
     if (!previewUrl) return;
 

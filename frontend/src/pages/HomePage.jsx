@@ -16,7 +16,7 @@ export default function HomePage() {
           </p>
 
           <p className="text-sm text-gray-500 mb-8">
-            Detects eczema, fungal infections, acne, psoriasis, scabies & healthy skin
+            Detects acne, eczema, fungal infections, psoriasis, scabies & healthy skin
           </p>
 
           <Link
@@ -69,9 +69,10 @@ export default function HomePage() {
       {/* Stats */}
       <section className="py-12 border-t border-gray-100">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-3 gap-6 text-center">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
               { value: '6', label: 'Conditions' },
+              { value: '89%', label: 'Accuracy' },
               { value: '6,700+', label: 'Training Images' },
               { value: '<2s', label: 'Analysis Time' },
             ].map(({ value, label }) => (

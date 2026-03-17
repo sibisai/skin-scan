@@ -39,16 +39,16 @@ def generate_explanation(
     confidence_pct = round(confidence * 100, 1)
     
     if comparison_image_b64:
-        image_desc = "a side-by-side view: original scan (left) and Grad-CAM overlay (right, red/yellow = AI focus areas)"
+        image_desc = "a side-by-side view: original scan (left) and attention overlay (right, red/yellow = AI focus areas)"
     else:
-        image_desc = "a scan with Grad-CAM overlay showing AI focus areas"
+        image_desc = "a scan with attention overlay showing AI focus areas"
     
     prompt = f"""This is {image_desc} of a {model_ctx['scan_type']}.
 AI result: {prediction} ({confidence_pct}% confidence)
 
 Write exactly 2 sentences:
 1. The visible skin features that indicate {prediction} (describe color, texture, pattern, distribution)
-2. Where the Grad-CAM highlighting (red/yellow) is focused on the skin
+2. Where the attention highlighting (red/yellow) is focused on the skin
 
 RULES:
 - Describe specific visual features you see

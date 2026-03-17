@@ -26,3 +26,7 @@ dist/
 
 # Vercel
 .vercel/
+
+# Claude Code
+CLAUDE.md
+.claude/

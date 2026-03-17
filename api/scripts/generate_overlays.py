@@ -10,60 +10,35 @@ Output:
   Saves overlay images to frontend/public/samples/overlays/
 """
 
-import os
 import sys
 import base64
 import requests
 from pathlib import Path
 
-# Configuration
 API_URL = "http://localhost:8000"
 SAMPLES_DIR = Path(__file__).parent.parent.parent / "frontend" / "public" / "samples"
 OUTPUT_DIR = SAMPLES_DIR / "overlays"
 
-# Sample images structure (matches sampleData.js)
+# Matches sampleData.js
 SAMPLE_IMAGES = {
-    "brain_tumor": [
-        {"id": "glioma_1", "path": "brain_tumor/glioma_1.jpg"},
-        {"id": "glioma_2", "path": "brain_tumor/glioma_2.jpg"},
-        {"id": "meningioma_1", "path": "brain_tumor/meningioma_1.jpg"},
-        {"id": "meningioma_2", "path": "brain_tumor/meningioma_2.jpg"},
-        {"id": "pituitary_1", "path": "brain_tumor/pituitary_1.jpg"},
-        {"id": "pituitary_2", "path": "brain_tumor/pituitary_2.jpg"},
-        {"id": "notumor_1", "path": "brain_tumor/notumor_1.jpg"},
-        {"id": "notumor_2", "path": "brain_tumor/notumor_2.jpg"},
-    ],
-    "pneumonia": [
-        {"id": "normal_1", "path": "pneumonia/normal_1.jpg"},
-        {"id": "normal_2", "path": "pneumonia/normal_2.jpg"},
-        {"id": "pneumonia_1", "path": "pneumonia/pneumonia_1.jpg"},
-        {"id": "pneumonia_2", "path": "pneumonia/pneumonia_2.jpg"},
-    ],
-    "retinal_oct": [
-        {"id": "cnv_1", "path": "retinal_oct/cnv_1.jpg"},
-        {"id": "cnv_2", "path": "retinal_oct/cnv_2.jpg"},
-        {"id": "dme_1", "path": "retinal_oct/dme_1.jpg"},
-        {"id": "dme_2", "path": "retinal_oct/dme_2.jpg"},
-        {"id": "drusen_1", "path": "retinal_oct/drusen_1.jpg"},
-        {"id": "drusen_2", "path": "retinal_oct/drusen_2.jpg"},
-        {"id": "normal_1", "path": "retinal_oct/normal_1.jpg"},
-        {"id": "normal_2", "path": "retinal_oct/normal_2.jpg"},
-    ],
-    "bone_fracture": [
-        {"id": "fractured_1", "path": "bone_fracture/fractured_1.jpg"},
-        {"id": "fractured_2", "path": "bone_fracture/fractured_2.jpg"},
-        {"id": "fractured_3", "path": "bone_fracture/fractured_3.jpg"},
-        {"id": "fractured_4", "path": "bone_fracture/fractured_4.jpg"},
-        {"id": "normal_1", "path": "bone_fracture/normal_1.jpg"},
-        {"id": "normal_2", "path": "bone_fracture/normal_2.jpg"},
-        {"id": "normal_3", "path": "bone_fracture/normal_3.jpg"},
-        {"id": "normal_4", "path": "bone_fracture/normal_4.jpg"},
+    "skin_disease": [
+        {"id": "acne_1", "path": "skin_disease/acne_1.jpg"},
+        {"id": "acne_2", "path": "skin_disease/acne_2.jpg"},
+        {"id": "eczema_1", "path": "skin_disease/eczema_1.jpg"},
+        {"id": "eczema_2", "path": "skin_disease/eczema_2.jpg"},
+        {"id": "fungal_1", "path": "skin_disease/fungal_1.jpg"},
+        {"id": "fungal_2", "path": "skin_disease/fungal_2.jpg"},
+        {"id": "healthy_1", "path": "skin_disease/healthy_1.jpg"},
+        {"id": "healthy_2", "path": "skin_disease/healthy_2.jpg"},
+        {"id": "psoriasis_1", "path": "skin_disease/psoriasis_1.jpg"},
+        {"id": "psoriasis_2", "path": "skin_disease/psoriasis_2.jpg"},
+        {"id": "scabies_1", "path": "skin_disease/scabies_1.jpg"},
+        {"id": "scabies_2", "path": "skin_disease/scabies_2.jpg"},
     ],
 }
 
 
 def check_api():
-    """Check if API is running."""
     try:
         response = requests.get(f"{API_URL}/health")
         return response.status_code == 200
@@ -72,10 +47,7 @@ def check_api():
 
 
 def generate_overlay(model: str, image_path: Path) -> bytes | None:
-    """
-    Generate Grad-CAM overlay for a single image.
-    Returns overlay image bytes or None on error.
-    """
+    """Generate Grad-CAM overlay for a single image."""
     if not image_path.exists():
         print(f"File not found: {image_path}")
         return None
@@ -103,10 +75,9 @@ def generate_overlay(model: str, image_path: Path) -> bytes | None:
 
 def main():
     print("=" * 60)
-    print("MedLens - Generate Grad-CAM Overlays")
+    print("SkinScan - Generate Grad-CAM Overlays")
     print("=" * 60)
     
-    # Check API
     if not check_api():
         print(f"\nERROR: Cannot connect to API at {API_URL}")
         print("Make sure the API is running: uvicorn app.main:app --reload")
@@ -120,11 +91,9 @@ def main():
         print(f"\nERROR: Samples directory not found: {SAMPLES_DIR}")
         sys.exit(1)
     
-    # Create output directory
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     print(f"✓ Output directory ready")
     
-    # Generate overlays
     total = sum(len(samples) for samples in SAMPLE_IMAGES.values())
     current = 0
     success = 0
@@ -143,7 +112,6 @@ def main():
             
             print(f"  ({current}/{total}) {sample['id']}...", end=" ", flush=True)
             
-            # Skip if already exists
             if output_path.exists():
                 print("SKIPPED (exists)")
                 success += 1
@@ -152,15 +120,13 @@ def main():
             overlay_bytes = generate_overlay(model, image_path)
             
             if overlay_bytes:
-                with open(output_path, "wb") as f:
-                    f.write(overlay_bytes)
+                output_path.write_bytes(overlay_bytes)
                 print(f"OK ({len(overlay_bytes) // 1024}KB)")
                 success += 1
             else:
                 print("FAILED")
                 failed += 1
     
-    # Summary
     print("\n" + "=" * 60)
     print(f"Complete! {success}/{total} overlays generated")
     if failed > 0:

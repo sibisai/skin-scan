@@ -28,7 +28,7 @@ export default function LoadingState({ imageUrl }) {
           </div>
           
           <p className="text-sm text-gray-500 text-center max-w-xs">
-            Running deep learning model and generating Grad-CAM visualization
+            Running deep learning model and generating visualization
           </p>
         </div>
       </div>

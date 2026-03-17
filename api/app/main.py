@@ -1,6 +1,6 @@
 """
 Medical Image Analysis API
-Extensible API for medical image classification with Grad-CAM visualization.
+Extensible API for medical image classification with model attention visualization.
 """
 
 from fastapi import FastAPI, File, UploadFile, HTTPException, Query
@@ -16,10 +16,6 @@ load_dotenv()
 
 from app.models import SkinDiseaseClassifier
 from app.utils.llm import generate_explanation, get_fallback_explanation
-
-# ============================================================================
-# Model Registry - Add new models here
-# ============================================================================
 
 MODELS: Dict[str, Any] = {}
 
@@ -43,46 +39,36 @@ def load_models():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Startup and shutdown events."""
-    # Startup: Load models
     print("=" * 50)
     print("Loading models...")
     load_models()
     print(f"Loaded {len(MODELS)} model(s): {list(MODELS.keys())}")
-    
-    # Check LLM availability
     if os.getenv("ANTHROPIC_API_KEY"):
-        print("✓ Anthropic API key configured")
+        print("Anthropic API key configured")
     else:
-        print("⚠ Anthropic API key not set - explanations will use fallback")
+        print("Anthropic API key not set - explanations will use fallback")
     print("=" * 50)
     yield
-    # Shutdown: Cleanup if needed
     print("Shutting down...")
 
-
-# ============================================================================
-# FastAPI App
-# ============================================================================
 
 app = FastAPI(
     title="SkinScan API",
     description="""
-    Skin disease classification API with Grad-CAM visualization.
+    Skin disease classification API with model attention visualization.
 
     ## Model
-    - **skin_disease**: Detects eczema, fungal, acne, psoriasis, scabies, healthy skin
+    - **skin_disease**: Detects acne, eczema, fungal infections, psoriasis, scabies & healthy skin
 
     ## Features
     - Image classification with confidence scores
-    - Grad-CAM visualization showing AI focus areas
+    - Model attention visualization showing AI focus areas
     - AI-generated explanations
     """,
     version="1.0.0",
     lifespan=lifespan
 )
 
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Configure appropriately for production
@@ -91,10 +77,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# ============================================================================
-# Health & Info Endpoints
-# ============================================================================
 
 @app.get("/", tags=["Health"])
 async def root():
@@ -120,10 +102,7 @@ async def health_check():
 @app.get("/models", tags=["Info"])
 async def list_models():
     """List all available models and their details."""
-    models_info = {}
-    for name, model in MODELS.items():
-        models_info[name] = model.get_model_info()
-    return {"models": models_info}
+    return {"models": {name: model.get_model_info() for name, model in MODELS.items()}}
 
 
 @app.get("/models/{model_name}", tags=["Info"])
@@ -137,43 +116,23 @@ async def get_model_info(model_name: str):
     return MODELS[model_name].get_model_info()
 
 
-# ============================================================================
-# Prediction Endpoints
-# ============================================================================
-
 @app.post("/predict/{model_name}", tags=["Prediction"])
 async def predict(
     model_name: str,
     file: UploadFile = File(..., description="Image file to classify")
 ):
-    """
-    Run classification on an uploaded image.
-    
-    Returns prediction with confidence scores for all classes.
-    """
-    # Validate model
+    """Run classification on an uploaded image. Returns prediction with confidence scores."""
     if model_name not in MODELS:
         raise HTTPException(
             status_code=404,
             detail=f"Model '{model_name}' not found. Available: {list(MODELS.keys())}"
         )
-    
-    # Validate file type
     if not file.content_type or not file.content_type.startswith("image/"):
-        raise HTTPException(
-            status_code=400,
-            detail="File must be an image (JPEG, PNG, etc.)"
-        )
-    
+        raise HTTPException(status_code=400, detail="File must be an image (JPEG, PNG, etc.)")
+
     try:
-        # Read image bytes
         image_bytes = await file.read()
-        
-        # Run prediction
-        result = MODELS[model_name].predict(image_bytes)
-        
-        return result
-    
+        return MODELS[model_name].predict(image_bytes)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
@@ -196,76 +155,50 @@ async def predict_with_gradcam(
     )
 ):
     """
-    Run classification with Grad-CAM visualization.
-    
-    Returns prediction with confidence scores, base64-encoded visualization images.
+    Run classification with model attention visualization.
+
+    Returns prediction with confidence scores and base64-encoded visualization images.
     Set include_explanation=true to also get AI explanation (slower).
-    
-    **Output types:**
-    - `heatmap`: Just the Grad-CAM heatmap
-    - `overlay`: Heatmap overlaid on original image
-    - `all`: Original, heatmap, overlay, and side-by-side comparison
+
+    **Output types:** `heatmap`, `overlay`, or `all` (original + heatmap + overlay + comparison).
     """
-    # Validate model
     if model_name not in MODELS:
         raise HTTPException(
             status_code=404,
             detail=f"Model '{model_name}' not found. Available: {list(MODELS.keys())}"
         )
-    
-    # Validate output type
     if output_type not in ["heatmap", "overlay", "all"]:
-        raise HTTPException(
-            status_code=400,
-            detail="output_type must be 'heatmap', 'overlay', or 'all'"
-        )
-    
-    # Validate file type
+        raise HTTPException(status_code=400, detail="output_type must be 'heatmap', 'overlay', or 'all'")
     if not file.content_type or not file.content_type.startswith("image/"):
-        raise HTTPException(
-            status_code=400,
-            detail="File must be an image (JPEG, PNG, etc.)"
-        )
-    
+        raise HTTPException(status_code=400, detail="File must be an image (JPEG, PNG, etc.)")
+
     try:
-        # Read image bytes
         image_bytes = await file.read()
-        
-        # Run prediction with Grad-CAM
         result = MODELS[model_name].get_gradcam(
-            image_bytes,
-            target_class=target_class,
-            output_type=output_type
+            image_bytes, target_class=target_class, output_type=output_type
         )
-        
-        # Generate explanation if requested (adds latency)
+
         if include_explanation:
-            comparison_b64 = result["images"].get("comparison")
-            original_b64 = result["images"].get("original")
-            overlay_b64 = result["images"].get("overlay")
-            
+            images = result["images"]
             explanation = generate_explanation(
                 model_name=model_name,
                 prediction=result["prediction"],
                 confidence=result["confidence"],
                 probabilities=result["probabilities"],
-                original_image_b64=original_b64,
-                overlay_image_b64=overlay_b64,
-                comparison_image_b64=comparison_b64,
+                original_image_b64=images.get("original"),
+                overlay_image_b64=images.get("overlay"),
+                comparison_image_b64=images.get("comparison"),
             )
-            
-            # Use fallback if LLM fails
             if explanation is None:
                 explanation = get_fallback_explanation(
                     model_name=model_name,
                     prediction=result["prediction"],
-                    confidence=result["confidence"]
+                    confidence=result["confidence"],
                 )
-            
             result["explanation"] = explanation
-        
+
         return result
-    
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
@@ -285,44 +218,32 @@ async def explain_prediction(
     
     Send the comparison image (side-by-side original and overlay) for best results.
     """
-    # Validate model
     if model_name not in MODELS:
         raise HTTPException(
             status_code=404,
             detail=f"Model '{model_name}' not found. Available: {list(MODELS.keys())}"
         )
-    
-    # Validate file type
     if not file.content_type or not file.content_type.startswith("image/"):
-        raise HTTPException(
-            status_code=400,
-            detail="File must be an image"
-        )
-    
+        raise HTTPException(status_code=400, detail="File must be an image")
+
     try:
-        # Read image bytes and convert to base64
         image_bytes = await file.read()
         image_b64 = base64.b64encode(image_bytes).decode('utf-8')
-        
-        # Generate explanation
+
         explanation = generate_explanation(
             model_name=model_name,
             prediction=prediction,
             confidence=confidence,
-            probabilities={},  # Not needed for explanation
+            probabilities={},
             comparison_image_b64=image_b64,
         )
-        
-        # Use fallback if LLM fails
         if explanation is None:
             explanation = get_fallback_explanation(
-                model_name=model_name,
-                prediction=prediction,
-                confidence=confidence
+                model_name=model_name, prediction=prediction, confidence=confidence
             )
-        
+
         return {"explanation": explanation}
-    
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Explanation failed: {str(e)}")
 
@@ -341,51 +262,33 @@ async def predict_gradcam_image(
     )
 ):
     """
-    Run classification and return Grad-CAM visualization as an image file.
-    
+    Run classification and return model attention visualization as an image file.
+
     Use this endpoint when you want to display the visualization directly
     (e.g., in an <img> tag) rather than receiving base64 data.
     """
-    # Validate model
     if model_name not in MODELS:
         raise HTTPException(
             status_code=404,
             detail=f"Model '{model_name}' not found. Available: {list(MODELS.keys())}"
         )
-    
-    # Map image_type to output_type
-    type_map = {
-        "original": "all",
-        "heatmap": "heatmap", 
-        "overlay": "overlay",
-        "comparison": "all"
-    }
-    
+
+    type_map = {"original": "all", "heatmap": "heatmap", "overlay": "overlay", "comparison": "all"}
     if image_type not in type_map:
         raise HTTPException(
             status_code=400,
             detail="image_type must be 'original', 'heatmap', 'overlay', or 'comparison'"
         )
-    
+
     try:
-        # Read image bytes
         image_bytes = await file.read()
-        
-        # Run prediction with Grad-CAM
         result = MODELS[model_name].get_gradcam(
-            image_bytes,
-            target_class=target_class,
-            output_type=type_map[image_type]
+            image_bytes, target_class=target_class, output_type=type_map[image_type]
         )
-        
-        # Get requested image
-        image_key = image_type if image_type != "comparison" else "comparison"
-        if image_key not in result["images"]:
-            # Fallback for heatmap/overlay only modes
-            image_key = list(result["images"].keys())[0]
-        
-        image_b64 = result["images"][image_key]
-        image_data = base64.b64decode(image_b64)
+
+        # Fall back to first available image if requested type wasn't generated
+        image_key = image_type if image_type in result["images"] else next(iter(result["images"]))
+        image_data = base64.b64decode(result["images"][image_key])
         
         return Response(
             content=image_data,
@@ -401,22 +304,9 @@ async def predict_gradcam_image(
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
 
-# ============================================================================
-# Error Handlers
-# ============================================================================
-
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
-    """Global exception handler."""
     return JSONResponse(
         status_code=500,
-        content={
-            "error": "Internal server error",
-            "detail": str(exc)
-        }
+        content={"error": "Internal server error", "detail": str(exc)},
     )
-
-
-# ============================================================================
-# Run with: uvicorn app.main:app --reload
-# ============================================================================

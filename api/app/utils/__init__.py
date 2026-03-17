@@ -1,12 +1,10 @@
 # Utils package
-from .gradcam import GradCAM, GradCAMVisualizer, image_to_base64, base64_to_image
+from .gradcam import GradCAMVisualizer, image_to_base64
 from .llm import generate_explanation, get_fallback_explanation
 
 __all__ = [
-    "GradCAM", 
-    "GradCAMVisualizer", 
-    "image_to_base64", 
-    "base64_to_image",
+    "GradCAMVisualizer",
+    "image_to_base64",
     "generate_explanation",
-    "get_fallback_explanation"
+    "get_fallback_explanation",
 ]

@@ -1,4 +1,4 @@
-# Medical Image Analysis API
+# SkinScan API
 # Optimized for Fly.io deployment
 
 FROM python:3.10-slim
@@ -26,15 +26,11 @@ COPY requirements.txt .
 # Install PyTorch CPU version (smaller image size for deployment)
 RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
 
-# Install other requirements
-RUN pip install --no-cache-dir \
-    fastapi==0.109.2 \
-    uvicorn[standard]==0.27.1 \
-    python-multipart==0.0.9 \
-    Pillow==10.2.0 \
-    opencv-python-headless==4.9.0.80 \
-    numpy==1.26.4 \
-    python-dotenv==1.0.1
+# Install remaining requirements (torch already satisfied from CPU install above)
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Pre-download HuggingFace model during build to avoid cold-start latency
+RUN python -c "from transformers import AutoModel; AutoModel.from_pretrained('Jayanth2002/dinov2-base-finetuned-SkinDisease')"
 
 # Copy application code
 COPY app/ ./app/
@@ -46,7 +42,7 @@ COPY weights/ ./weights/
 EXPOSE 8080
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')" || exit 1
 
 # Run the application

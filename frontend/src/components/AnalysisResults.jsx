@@ -4,47 +4,15 @@ import clsx from 'clsx';
 import { conditionDescriptions, modelInfo } from '../utils/sampleData';
 import { generateAnalysisReport } from '../utils/generatePDF';
 
-// Format class names for display (e.g., "notumor" -> "No Tumor", "glioma" -> "Glioma")
 function formatClassName(name) {
-  const formatMap = {
-    // Brain tumor
-    'notumor': 'No Tumor',
-    'glioma': 'Glioma',
-    'meningioma': 'Meningioma',
-    'pituitary': 'Pituitary',
-    // Pneumonia
-    'normal': 'Normal',
-    'pneumonia': 'Pneumonia',
-    // Retinal OCT
-    'cnv': 'CNV',
-    'dme': 'DME',
-    'drusen': 'Drusen',
-    // Bone fracture
-    'fractured': 'Fractured',
-    'not fractured': 'Not Fractured',
-  };
-
-  const lower = name.toLowerCase();
-  if (formatMap[lower]) {
-    return formatMap[lower];
-  }
-
-  // Fallback: capitalize first letter of each word
-  return name.split(' ').map(word =>
+  return name.split(/[\s_]/).map(word =>
     word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
   ).join(' ');
 }
 
-// Get condition description
-function getConditionDescription(prediction) {
-  const lower = prediction.toLowerCase();
-  return conditionDescriptions[lower] || null;
-}
-
-// Format confidence percentage - cap at 99.9% for medical appropriateness
+// Cap at 99.9% -- no medical AI should claim 100% certainty
 function formatConfidence(prob) {
   const percentage = prob * 100;
-  // Cap at 99.9% - no medical AI should claim 100% certainty
   if (percentage >= 99.95) {
     return '99.9';
   }
@@ -59,7 +27,7 @@ export default function AnalysisResults({
   explanation
 }) {
   const [heatmapOpacity, setHeatmapOpacity] = useState(50);
-  const [showGradcamInfo, setShowGradcamInfo] = useState(false);
+  const [showAttentionInfo, setShowAttentionInfo] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const canvasRef = useRef(null);
   const [originalImg, setOriginalImg] = useState(null);
@@ -73,7 +41,7 @@ export default function AnalysisResults({
     : [];
 
   const isPredictionCorrect = confidence > 0.7;
-  const conditionDescription = prediction ? getConditionDescription(prediction) : null;
+  const conditionDescription = prediction ? conditionDescriptions[prediction.toLowerCase()] ?? null : null;
 
   // Load images for canvas blending
   useEffect(() => {
@@ -209,19 +177,19 @@ export default function AnalysisResults({
             {/* Visualization Section */}
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <h4 className="text-sm font-medium text-gray-700">Grad-CAM Visualization</h4>
+                <h4 className="text-sm font-medium text-gray-700">Model Attention</h4>
                 <button
-                  onClick={() => setShowGradcamInfo(!showGradcamInfo)}
+                  onClick={() => setShowAttentionInfo(!showAttentionInfo)}
                   className="text-gray-400 hover:text-gray-600"
                 >
                   <Info className="w-4 h-4" />
                 </button>
               </div>
 
-              {showGradcamInfo && (
+              {showAttentionInfo && (
                 <div className="mb-3 p-3 bg-primary-50 rounded-lg text-xs text-primary-800">
-                  <strong>What is Grad-CAM?</strong> Gradient-weighted Class Activation Mapping highlights
-                  the regions of the image that most influenced the model's prediction.
+                  <strong>What is Model Attention?</strong> This visualization highlights the regions of the
+                  image that most influenced the model's prediction.
                 </div>
               )}
 
