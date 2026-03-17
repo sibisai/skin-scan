@@ -14,6 +14,7 @@ from transformers import AutoModel
 from PIL import Image
 import json
 import io
+import time
 from typing import Dict, Any, Optional
 
 from .base import BaseClassifier
@@ -73,7 +74,7 @@ class SkinDiseaseClassifier(BaseClassifier):
         return self.transform(image).unsqueeze(0).to(self.device)
 
     def _run_inference(self, image_bytes: bytes):
-        """Shared preprocessing + forward pass. Returns (input_tensor, predicted_idx, confidence, probs_dict)."""
+        """Preprocessing + forward pass. Returns (input_tensor, predicted_idx, confidence, probs_dict)."""
         image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
         input_tensor = self.preprocess(image)
 
@@ -100,7 +101,9 @@ class SkinDiseaseClassifier(BaseClassifier):
         target_class: Optional[int] = None,
         output_type: str = "all",
     ) -> Dict[str, Any]:
+        t0 = time.time()
         input_tensor, predicted, confidence, probs_dict = self._run_inference(image_bytes)
+        t1 = time.time()
 
         if target_class is None:
             target_class = predicted
@@ -108,6 +111,12 @@ class SkinDiseaseClassifier(BaseClassifier):
         visualizations = self.gradcam_visualizer.generate_visualization(
             input_tensor, target_class=target_class, output_type=output_type
         )
+        t2 = time.time()
+
+        images = {name: image_to_base64(img) for name, img in visualizations.items()}
+        t3 = time.time()
+
+        print(f"[TIMING] inference={t1-t0:.2f}s viz={t2-t1:.2f}s encode={t3-t2:.2f}s total={t3-t0:.2f}s")
 
         return {
             "model": self.model_name,
@@ -116,7 +125,7 @@ class SkinDiseaseClassifier(BaseClassifier):
             "probabilities": probs_dict,
             "visualized_class": self.class_names[target_class],
             "visualized_class_index": target_class,
-            "images": {name: image_to_base64(img) for name, img in visualizations.items()},
+            "images": images,
         }
 
 

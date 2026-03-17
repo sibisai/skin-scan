@@ -67,22 +67,18 @@ class ViTAttentionMap:
         )
 
     def generate(self, input_tensor: torch.Tensor, target_class: Optional[int] = None) -> np.ndarray:
-        self.model.eval()
+        if self.attention_weights is None:
+            self.model.eval()
+            with torch.no_grad():
+                self.model(input_tensor)
 
-        with torch.no_grad():
-            self.model(input_tensor)
-
-        # attention_probs shape: (batch, num_heads, seq_len, seq_len)
-        # where seq_len = 1 CLS + 256 patches (224/14 = 16, 16*16 = 256)
         attn = self.attention_weights[0]  # (num_heads, 257, 257)
-
-        # CLS token's attention to each patch token (skip CLS→CLS at index 0)
-        cls_attn = attn[:, 0, 1:]  # (num_heads, 256)
-
-        cls_attn = cls_attn.mean(dim=0)  # (256,) average across heads
+        cls_attn = attn[:, 0, 1:].mean(dim=0)  # CLS→patch attention, averaged across heads
 
         num_patches = int(cls_attn.shape[0] ** 0.5)
         cam = cls_attn.reshape(num_patches, num_patches).cpu().numpy()
+        self.attention_weights = None
+
         return _normalize(cam)
 
 
