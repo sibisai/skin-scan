@@ -124,6 +124,42 @@ Image-specific explanations generated using Claude Haiku vision API, describing 
 | `POST` | `/predict/{model_name}/gradcam` | Classification with attention map    |
 | `POST` | `/explain/{model_name}`         | AI-generated explanation             |
 
+## Deployment
+
+### Frontend (Vercel)
+
+Hosted on Vercel with automatic deploys on push to `master`.
+
+- **URL**: https://skinscan-two.vercel.app
+- SPA routing is configured via `frontend/vercel.json`
+
+### API (Fly.io)
+
+Hosted on Fly.io with suspend mode for fast resume (~3s) instead of cold starts (~20s).
+
+```bash
+cd api
+fly deploy --ha=false
+```
+
+**For demos** (keep machine always warm, no suspend delay):
+
+```bash
+fly scale count 1 --app skinscan-api
+```
+
+**Reset to auto-suspend after demo:**
+
+```bash
+fly scale count 0 --app skinscan-api
+```
+
+**View logs:**
+
+```bash
+fly logs -a skinscan-api
+```
+
 ## Local Development
 
 ### API
